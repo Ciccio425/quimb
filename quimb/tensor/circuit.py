@@ -844,6 +844,45 @@ def givens2_param_gen(params):
 
 register_param_gate("GIVENS2", givens2_param_gen, num_qubits=2)
 
+def pauli2_param_gen(params):
+    pauli_str = params[0].upper()
+    if len(pauli_str) != 2:
+        raise ValueError("Only two-qubit Pauli gates are supported.")
+    pauli_dict = {
+        "I": ((1, 0), (0, 1)),
+        "X": ((0, 1), (1, 0)),
+        "Y": ((0, -1j), (1j, 0)),
+        "Z": ((1, 0), (0, -1))
+    }
+    def tensor(m1, m2):
+        return (
+            (m1[0][0]*m2[0][0], m1[0][0]*m2[0][1], m1[0][1]*m2[0][0], m1[0][1]*m2[0][1]),
+            (m1[0][0]*m2[1][0], m1[0][0]*m2[1][1], m1[0][1]*m2[1][0], m1[0][1]*m2[1][1]),
+            (m1[1][0]*m2[0][0], m1[1][0]*m2[0][1], m1[1][1]*m2[0][0], m1[1][1]*m2[0][1]),
+            (m1[1][0]*m2[1][0], m1[1][0]*m2[1][1], m1[1][1]*m2[1][0], m1[1][1]*m2[1][1])
+        )
+    m1 = pauli_dict[pauli_str[0]]
+    m2 = pauli_dict[pauli_str[1]]
+    data = tensor(m1, m2)
+    return recursive_stack(data)
+
+register_param_gate("PAULI2", pauli2_param_gen, 2)
+
+def pauli1_param_gen(params):
+    pauli_str = params[0].upper()
+    if len(pauli_str) != 1:
+        raise ValueError("Only one-qubit Pauli gates are supported for PAULI1.")
+    pauli_dict = {
+        "I": ((1, 0), (0, 1)),
+        "X": ((0, 1), (1, 0)),
+        "Y": ((0, -1j), (1j, 0)),
+        "Z": ((1, 0), (0, -1))
+    }
+    data = pauli_dict[pauli_str]
+    return recursive_stack(data)
+
+register_param_gate("PAULI1", pauli1_param_gen, 1)
+
 
 def xx_plus_yy_param_gen(params):
     theta, beta = params[0], params[1]
